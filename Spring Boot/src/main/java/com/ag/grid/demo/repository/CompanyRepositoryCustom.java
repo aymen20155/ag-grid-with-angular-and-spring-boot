@@ -23,86 +23,82 @@ import java.util.Optional;
 @Component
 public class CompanyRepositoryCustom {
 
-    @Autowired
-    EntityManager entityManager;
+	@Autowired
+	EntityManager entityManager;
 
-    public Page<CompanyResponse> getCompanies(Pageable pageable, RequestWithFilterAndSort requestWithFilterAndSort){
-        CriteriaBuilder criteriaBuilder=entityManager.getCriteriaBuilder();
-        CriteriaQuery<CompanyResponse> companyResponseCriteriaQuery=criteriaBuilder.createQuery(CompanyResponse.class);
-        Root<Company> companyRoot=companyResponseCriteriaQuery.from(Company.class);
+	public Page<CompanyResponse> getCompanies(Pageable pageable, RequestWithFilterAndSort requestWithFilterAndSort) {
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<CompanyResponse> companyResponseCriteriaQuery = criteriaBuilder
+				.createQuery(CompanyResponse.class);
+		Root<Company> companyRoot = companyResponseCriteriaQuery.from(Company.class);
 
-        companyResponseCriteriaQuery.multiselect(companyRoot.get("id"),
-                companyRoot.get("companyName"),
-                companyRoot.get("employeeName"),
-                companyRoot.get("description"),
-                companyRoot.get("leave")
-                );
+		companyResponseCriteriaQuery.multiselect(companyRoot.get("id"), companyRoot.get("companyName"),
+				companyRoot.get("employeeName"), companyRoot.get("description"), companyRoot.get("leave"));
 
-        if(requestWithFilterAndSort.getColId()!=null && requestWithFilterAndSort.getSort().equals("desc")){
-            companyResponseCriteriaQuery.orderBy(criteriaBuilder.desc(companyRoot.get(requestWithFilterAndSort.getColId())));
-        }
-        else if(requestWithFilterAndSort.getColId()!=null && requestWithFilterAndSort.getSort().equals("asc")){
-            companyResponseCriteriaQuery.orderBy(criteriaBuilder.asc(companyRoot.get(requestWithFilterAndSort.getColId())));
-        }
+		if (requestWithFilterAndSort.getColId() != null && requestWithFilterAndSort.getSort().equals("desc")) {
+			companyResponseCriteriaQuery
+					.orderBy(criteriaBuilder.desc(companyRoot.get(requestWithFilterAndSort.getColId())));
+		} else if (requestWithFilterAndSort.getColId() != null && requestWithFilterAndSort.getSort().equals("asc")) {
+			companyResponseCriteriaQuery
+					.orderBy(criteriaBuilder.asc(companyRoot.get(requestWithFilterAndSort.getColId())));
+		}
 
-        List<Predicate> predicateList=new ArrayList<>();
-        predicateList.addAll(getFilter(criteriaBuilder,predicateList,companyRoot,requestWithFilterAndSort));
-        Predicate predicateArray[]=new Predicate[predicateList.size()];
+		List<Predicate> predicateList = new ArrayList<>();
+		predicateList.addAll(getFilter(criteriaBuilder, predicateList, companyRoot, requestWithFilterAndSort));
+		Predicate predicateArray[] = new Predicate[predicateList.size()];
 
-        companyResponseCriteriaQuery.where(criteriaBuilder.and(predicateList.toArray(predicateArray)));
+		companyResponseCriteriaQuery.where(criteriaBuilder.and(predicateList.toArray(predicateArray)));
 
-        List<CompanyResponse> companyResponseList=entityManager.createQuery(companyResponseCriteriaQuery).getResultList();
-        List<CompanyResponse> companyResponses=entityManager.createQuery(companyResponseCriteriaQuery).
-                setFirstResult((int) pageable.getOffset()).
-                setMaxResults(pageable.getPageSize()).
-                getResultList();
-        return new PageImpl<>(companyResponses,pageable,companyResponseList.size());
-    }
+		List<CompanyResponse> companyResponseList = entityManager.createQuery(companyResponseCriteriaQuery)
+				.getResultList();
+		List<CompanyResponse> companyResponses = entityManager.createQuery(companyResponseCriteriaQuery)
+				.setFirstResult((int) pageable.getOffset()).setMaxResults(pageable.getPageSize()).getResultList();
+		return new PageImpl<>(companyResponses, pageable, companyResponseList.size());
+	}
 
-    private List<Predicate> getFilter(CriteriaBuilder criteriaBuilder,List<Predicate> predicateList,Root<Company> companyRoot,RequestWithFilterAndSort requestWithFilterAndSort){
-        Optional.ofNullable(requestWithFilterAndSort.getFilterModel()).ifPresent(filterModelMap->{
-            for(Map.Entry<String, FilterModel> filterModelEntry:filterModelMap.entrySet()){
+	private List<Predicate> getFilter(CriteriaBuilder criteriaBuilder, List<Predicate> predicateList,
+			Root<Company> companyRoot, RequestWithFilterAndSort requestWithFilterAndSort) {
+		Optional.ofNullable(requestWithFilterAndSort.getFilterModel()).ifPresent(filterModelMap -> {
+			for (Map.Entry<String, FilterModel> filterModelEntry : filterModelMap.entrySet()) {
 
-                String colName=filterModelEntry.getKey();
-                FilterModel filterModel=filterModelEntry.getValue();
-                System.out.println("colName in filter : "+colName);
-                /*if(filterModel.getType().equalsIgnoreCase("NUMBER") && filterModel.getFilterType().equalsIgnoreCase("GREATETHEN")){
-                    predicateList.add(criteriaBuilder.ge(companyRoot.get(colName),Long.parseLong(filterModel.getFilter())));
-                }
-                else if(filterModel.getType().equalsIgnoreCase("NUMBER") && filterModel.getFilterType().equalsIgnoreCase("LESSTHEN")){
-                    predicateList.add(criteriaBuilder.lessThan(companyRoot.get(colName),Long.parseLong(filterModel.getFilter())));
+				String colName = filterModelEntry.getKey();
+				FilterModel filterModel = filterModelEntry.getValue();
+				System.out.println("colName in filter : " + colName);
+				/*
+				 * if(filterModel.getType().equalsIgnoreCase("NUMBER") &&
+				 * filterModel.getFilterType().equalsIgnoreCase("GREATETHEN")){
+				 * predicateList.add(criteriaBuilder.ge(companyRoot.get(colName),Long.parseLong(
+				 * filterModel.getFilter()))); } else
+				 * if(filterModel.getType().equalsIgnoreCase("NUMBER") &&
+				 * filterModel.getFilterType().equalsIgnoreCase("LESSTHEN")){
+				 * predicateList.add(criteriaBuilder.lessThan(companyRoot.get(colName),Long.
+				 * parseLong(filterModel.getFilter())));
+				 * 
+				 * }
+				 */
+				if (filterModel.getType().equalsIgnoreCase("equals")) {
+					predicateList.add(criteriaBuilder.equal(companyRoot.get(colName), filterModel.getFilter()));
+				} else if (filterModel.getType().equalsIgnoreCase("notEqual")) {
+					predicateList.add(criteriaBuilder.notEqual(companyRoot.get(colName), filterModel.getFilter()));
 
-                }*/
-                if(filterModel.getType().equalsIgnoreCase("equals")){
-                    predicateList.add(criteriaBuilder.equal(companyRoot.get(colName),filterModel.getFilter()));
-                }
-                else if(filterModel.getType().equalsIgnoreCase("notEqual")){
-                    predicateList.add(criteriaBuilder.notEqual(companyRoot.get(colName),filterModel.getFilter()));
+				} else if (filterModel.getType().equalsIgnoreCase("contains")) {
+					predicateList.add(criteriaBuilder.like(companyRoot.get(colName), filterModel.getFilter()));
 
-                }
-                else if(filterModel.getType().equalsIgnoreCase("contains")){
-                    predicateList.add(criteriaBuilder.like(companyRoot.get(colName),filterModel.getFilter()));
+				} else if (filterModel.getType().equalsIgnoreCase("notContains")) {
+					predicateList.add(criteriaBuilder.notLike(companyRoot.get(colName), filterModel.getFilter()));
 
-                }
-                else if(filterModel.getType().equalsIgnoreCase("notContains")){
-                    predicateList.add(criteriaBuilder.notLike(companyRoot.get(colName),filterModel.getFilter()));
+				} else if (filterModel.getType().equalsIgnoreCase("startsWith")) {
+					predicateList.add(criteriaBuilder.like(companyRoot.get(colName), "%" + filterModel.getFilter()));
 
-                }
-                else if(filterModel.getType().equalsIgnoreCase("startsWith")){
-                    predicateList.add(criteriaBuilder.like(companyRoot.get(colName),"%"+filterModel.getFilter()));
-
-                }
-                else if(filterModel.getType().equalsIgnoreCase("endsWith")){
-                    predicateList.add(criteriaBuilder.like(companyRoot.get(colName),filterModel.getFilter()+"%"));
-                }
-                else if(filterModel.getType().equalsIgnoreCase("blank")){
-                    predicateList.add(criteriaBuilder.isNull(companyRoot.get(colName)));
-                }
-                else if(filterModel.getType().equalsIgnoreCase("notBlank")){
-                    predicateList.add(criteriaBuilder.isNotNull(companyRoot.get(colName)));
-                }
-            }
-        });
-        return  predicateList;
-    }
+				} else if (filterModel.getType().equalsIgnoreCase("endsWith")) {
+					predicateList.add(criteriaBuilder.like(companyRoot.get(colName), filterModel.getFilter() + "%"));
+				} else if (filterModel.getType().equalsIgnoreCase("blank")) {
+					predicateList.add(criteriaBuilder.isNull(companyRoot.get(colName)));
+				} else if (filterModel.getType().equalsIgnoreCase("notBlank")) {
+					predicateList.add(criteriaBuilder.isNotNull(companyRoot.get(colName)));
+				}
+			}
+		});
+		return predicateList;
+	}
 }

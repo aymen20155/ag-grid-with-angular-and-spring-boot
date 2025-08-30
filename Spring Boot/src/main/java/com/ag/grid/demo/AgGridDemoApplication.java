@@ -33,7 +33,6 @@ public class AgGridDemoApplication {
 				List<Company> companyList=r.stream().map(row->{
 					return companyRepository.save(new Company(row[1],row[2],row[3],Integer.parseInt(row[4])));
 				}).collect(Collectors.toList());
-
 				System.out.println(companyList);
 			}
 

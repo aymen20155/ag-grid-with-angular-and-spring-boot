@@ -11,10 +11,10 @@ import { RequestWithFilterAndSort } from 'src/app/model/request-with-sort-filter
 })
 export class AppService {
 
-  constructor(private httpClient:HttpClient,) { }
+  constructor(private httpClient: HttpClient,) { }
 
-  getCompany(requestWithSortAndFilter:RequestWithFilterAndSort,page:number,size:number) {
-    let apiURL ='http://localhost:8082/get-companies?page='+page+"&size="+size
-    return this.httpClient.post(apiURL,requestWithSortAndFilter);    
+  getCompany(requestWithSortAndFilter: RequestWithFilterAndSort, page: number, size: number) {
+    let apiURL = 'http://localhost:8082/get-companies?page=' + page + "&size=" + size
+    return this.httpClient.post(apiURL, requestWithSortAndFilter);
   }
 }
