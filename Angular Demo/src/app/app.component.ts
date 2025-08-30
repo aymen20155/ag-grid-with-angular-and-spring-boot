@@ -5,6 +5,7 @@ import { OnInit } from '@angular/core';
 import { AppService } from './service/app/app.service';
 import { RequestWithFilterAndSort } from './model/request-with-sort-filter';
 import { IDatasource, IGetRowsParams } from 'ag-grid-community';
+import { Observable, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -15,21 +16,15 @@ export class AppComponent implements OnInit {
   private gridApi!: GridApi;
   private gridColumnApi!: ColumnApi;
   defaultPageSize = 10
-
+  sub!: Subscription;
+  errorMessage: string = '';
+  title = 'Ag_Grid_Demo';
+  rowData = [];
 
   constructor(private appService: AppService) { }
   ngOnInit(): void {
-/*     let request: RequestWithFilterAndSort = { colId: undefined, sort: undefined, filterModel: undefined, data: undefined };
-    this.appService.getCompany(request, 0, 10).subscribe((res: any) => {
-      console.log("response data : ", res)
-      //this.rowData=res['content']
-    }, err => {
-      console.log("errpr : ", err)
-    })
 
-    this.gridOptions.rowModelType = 'infinite'; */
   }
-  title = 'Ag_Grid_Demo';
 
   columnDefs: ColDef[] = [
     { field: 'id' },
@@ -39,14 +34,6 @@ export class AppComponent implements OnInit {
     { field: 'leave' },
   ];
 
-/*   rowData = [
-    { id: 1245, companyName: 'Celica', employeeName: "raul", description: "description", leave: 2 },
-    { id: 1245, companyName: 'Celica', employeeName: "raul", description: "description", leave: 2 },
-    { id: 1245, companyName: 'Celica', employeeName: "raul", description: "description", leave: 2 },
-    { id: 1245, companyName: 'Celica', employeeName: "raul", description: "description", leave: 2 },
-
-  ]; */
-    rowData = [];
 
   gridOptions: GridOptions = {
     defaultColDef: {
@@ -74,19 +61,27 @@ export class AppComponent implements OnInit {
       }
       let request: RequestWithFilterAndSort = { colId: colId, sort: sort, filterModel: params.filterModel, data: undefined };
 
-      this.appService.getCompany(request, this.gridApi.paginationGetCurrentPage(), this.gridApi.paginationGetPageSize()).subscribe((response: any) => {
-        params.successCallback(
-          response["content"], response["totalElements"]
-        );
-      }, err => {
-        console.log("error in data source : ", err)
-      })
+      this.sub = this.appService
+        .getCompany(request, this.gridApi.paginationGetCurrentPage(), this.gridApi.paginationGetPageSize())
+        .subscribe({
+          next: response => {
+            params.successCallback(response["content"], response["totalElements"]);
+          },
+          error: err => {
+            this.errorMessage = err;
+            console.error(err);
+          }
+        });
     }
   }
-
 
   onPageSizeChanged(event: any) {
     console.log("Inside onPageSizeChanged");
     this.gridApi.paginationSetPageSize(Number(event.target.value));
   }
+
+  ngOnDestroy(): void {
+    this.sub.unsubscribe();
+  }
+
 }
