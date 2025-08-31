@@ -2,20 +2,20 @@ import { Component } from '@angular/core';
 import { ColDef } from 'ag-grid-community';
 import { ColumnApi, GridApi, GridOptions } from 'ag-grid-community/dist/lib/main';
 import { OnInit } from '@angular/core';
-import { AppService } from './service/app/app.service';
-import { RequestWithFilterAndSort } from './model/request-with-sort-filter';
+import { AppService } from '../service/app/app.service';
+import { RequestWithFilterAndSort } from '../model/request-with-sort-filter';
 import { IDatasource, IGetRowsParams } from 'ag-grid-community';
-import { Observable, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css'],
+  selector: 'grid-comp',
+  templateUrl: './company.component.html',
+  styleUrls: ['../app.component.css'],
 })
-export class AppComponent implements OnInit {
+export class CompanyComponent implements OnInit {
   private gridApi!: GridApi;
   private gridColumnApi!: ColumnApi;
-  defaultPageSize = 10
+  defaultPageSize = 20
   sub!: Subscription;
   errorMessage: string = '';
   title = 'Ag_Grid_Demo';

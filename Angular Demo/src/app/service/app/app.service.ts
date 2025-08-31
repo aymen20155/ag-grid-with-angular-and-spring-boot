@@ -22,6 +22,15 @@ export class AppService {
                 );
   }
 
+    getCompanies(from: number, to: number) :Observable<any> {
+    let apiURL = 'http://localhost:8082/get-companies?start=' + from + "&end=" + to
+    return this.httpClient.get(apiURL)
+               .pipe(
+                  tap(data => console.log("All data : " + JSON.stringify(data))),
+                  catchError(this.handleError)
+                );
+  }
+
       private handleError(err: HttpErrorResponse) {
       // in a real world app, we may send the server to some remote logging infrastructure
       // instead of just logging it to the console

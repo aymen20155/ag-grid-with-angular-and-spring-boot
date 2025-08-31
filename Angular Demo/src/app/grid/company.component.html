@@ -1,0 +1,12 @@
+<ag-grid-angular
+    style="width: 1020px; height: 730px;"
+    class="ag-theme-alpine"
+    [rowData]="rowData"
+    [columnDefs]="columnDefs"
+    [gridOptions]="gridOptions"
+    [pagination]="true" 
+    (gridReady)="onGridReady($event)" 
+    [paginationPageSize]="defaultPageSize" 
+    [cacheBlockSize]="defaultPageSize" 
+    [enableRangeSelection]="true">
+</ag-grid-angular>

@@ -1,30 +1,39 @@
 package com.ag.grid.demo.repository;
 
-import com.ag.grid.demo.model.CompanyResponse;
-import com.ag.grid.demo.model.FilterModel;
-import com.ag.grid.demo.model.RequestWithFilterAndSort;
-import com.ag.grid.demo.pojo.Company;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Component;
-
-import javax.persistence.EntityManager;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@Component
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import com.ag.grid.demo.model.CompanyResponse;
+import com.ag.grid.demo.model.FilterModel;
+import com.ag.grid.demo.model.RequestWithFilterAndSort;
+import com.ag.grid.demo.pojo.Company;
+
+@Service
 public class CompanyRepositoryCustom {
 
-	@Autowired
-	EntityManager entityManager;
+	@PersistenceContext
+	private EntityManager entityManager;
+
+	public List<CompanyResponse> getCompanies(int start, int end) {
+		int limit = end - start + 1;
+		int offset = start;
+		String query = String.format("SELECT * FROM COMPANY LIMIT %d OFFSET %d", limit, offset);
+		return entityManager.createNativeQuery(query, CompanyResponse.class).getResultList();
+	}
 
 	public Page<CompanyResponse> getCompanies(Pageable pageable, RequestWithFilterAndSort requestWithFilterAndSort) {
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
@@ -101,4 +110,5 @@ public class CompanyRepositoryCustom {
 		});
 		return predicateList;
 	}
+
 }
