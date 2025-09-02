@@ -28,11 +28,11 @@ public class CompanyRepositoryCustom {
 	@PersistenceContext
 	private EntityManager entityManager;
 
-	public List<CompanyResponse> getCompanies(int start, int end) {
-		int limit = end - start + 1;
+	public List<Company> getCompanies(int start, int end) {
+		int limit = end - start;
 		int offset = start;
-		String query = String.format("SELECT * FROM COMPANY LIMIT %d OFFSET %d", limit, offset);
-		return entityManager.createNativeQuery(query, CompanyResponse.class).getResultList();
+		String query = String.format("SELECT * FROM COMPANY WHERE ID <= 121 LIMIT %d OFFSET %d", limit, offset);
+		return entityManager.createNativeQuery(query, Company.class).getResultList();
 	}
 
 	public Page<CompanyResponse> getCompanies(Pageable pageable, RequestWithFilterAndSort requestWithFilterAndSort) {

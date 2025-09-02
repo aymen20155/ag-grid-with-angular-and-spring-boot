@@ -23,7 +23,7 @@ export class AppService {
   }
 
     getCompanies(from: number, to: number) :Observable<any> {
-    let apiURL = 'http://localhost:8082/get-companies?start=' + from + "&end=" + to
+    let apiURL = 'http://localhost:8082/get-companies-v1?start=' + from + "&end=" + to
     return this.httpClient.get(apiURL)
                .pipe(
                   tap(data => console.log("All data : " + JSON.stringify(data))),

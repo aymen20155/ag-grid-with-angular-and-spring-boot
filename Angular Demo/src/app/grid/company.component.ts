@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { ColDef } from 'ag-grid-community';
-import { ColumnApi, GridApi, GridOptions } from 'ag-grid-community/dist/lib/main';
+import { ColumnApi, GridApi, GridOptions, RowModelType } from 'ag-grid-community/dist/lib/main';
 import { OnInit } from '@angular/core';
 import { AppService } from '../service/app/app.service';
 import { RequestWithFilterAndSort } from '../model/request-with-sort-filter';
@@ -20,6 +20,12 @@ export class CompanyComponent implements OnInit {
   errorMessage: string = '';
   title = 'Ag_Grid_Demo';
   rowData = [];
+  rowModelType: RowModelType = "infinite";
+  rowBuffer = 0;
+  cacheOverflowSize = 2;
+  maxConcurrentDatasourceRequests = 1;
+  infiniteInitialRowCount = 1000;
+  maxBlocksInCache = 10;
 
   constructor(private appService: AppService) { }
   ngOnInit(): void {
@@ -58,20 +64,28 @@ export class CompanyComponent implements OnInit {
         sort = params.sortModel[0].sort;
         colId = params.sortModel[0].colId;
       }
-      let request: RequestWithFilterAndSort = { colId: colId, sort: sort, filterModel: params.filterModel, data: undefined };
+      // let request: RequestWithFilterAndSort = { colId: colId, sort: sort, filterModel: params.filterModel, data: undefined };
 
-      this.sub = this.appService
-        .getCompany(request, this.gridApi.paginationGetCurrentPage(), this.gridApi.paginationGetPageSize())
+
+      // this.sub = this.appService
+      //   .getCompany(request, this.gridApi.paginationGetCurrentPage(), this.gridApi.paginationGetPageSize())
+      this.sub = this.appService.getCompanies(params.startRow, params.endRow)
         .subscribe({
           next: response => {
-            params.successCallback(response["content"], response["totalElements"]);
+            let lastRow = -1;
+            if (response.length < this.defaultPageSize || response.length == 0) {
+                lastRow = params.startRow + response.length;
+              }
+            params.successCallback(response, lastRow);
           },
           error: err => {
             this.errorMessage = err;
             console.error(err);
-          }
+          },
+          // complete: () => this.gridApi.setDatasource(this.dataSource)
         });
-    }
+    },
+    rowCount: undefined,
   }
 
   onPageSizeChanged(event: any) {
